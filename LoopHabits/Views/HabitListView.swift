@@ -1,0 +1,51 @@
+import SwiftUI
+import SwiftData
+
+struct HabitListView: View {
+    @Environment(\.modelContext) private var context
+    @Query(sort: \Habit.createdAt) private var habits: [Habit]
+    @State private var showingAdd = false
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(habits) { habit in
+                    NavigationLink(destination: HabitDetailView(habit: habit)) {
+                        HabitRowView(habit: habit)
+                    }
+                }
+                .onDelete(perform: delete)
+            }
+            .navigationTitle("Привычки")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { showingAdd = true } label: { Image(systemName: "plus") }
+                }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    EditButton()
+                }
+            }
+            .sheet(isPresented: $showingAdd) {
+                AddHabitView()
+            }
+            .overlay {
+                if habits.isEmpty {
+                    ContentUnavailableView(
+                        "Нет привычек",
+                        systemImage: "checkmark.circle",
+                        description: Text("Нажмите + чтобы добавить первую привычку")
+                    )
+                }
+            }
+        }
+    }
+
+    private func delete(at offsets: IndexSet) {
+        offsets.forEach { context.delete(habits[$0]) }
+    }
+}
+
+#Preview {
+    HabitListView()
+        .modelContainer(for: [Habit.self, HabitEntry.self], inMemory: true)
+}

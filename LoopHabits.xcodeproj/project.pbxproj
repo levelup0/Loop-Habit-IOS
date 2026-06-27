@@ -1,0 +1,262 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA000014 /* LoopHabitsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000013; };
+		AA000016 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000015; };
+		AA000018 /* HabitListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000017; };
+		AA000020 /* HabitRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000019; };
+		AA000022 /* AddHabitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000021; };
+		AA000024 /* HabitDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000023; };
+		AA000026 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000025; };
+		AA000035 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000034; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AA000005 /* LoopHabits.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LoopHabits.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA000013 /* LoopHabitsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopHabitsApp.swift; sourceTree = "<group>"; };
+		AA000015 /* Habit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Habit.swift; sourceTree = "<group>"; };
+		AA000017 /* HabitListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitListView.swift; sourceTree = "<group>"; };
+		AA000019 /* HabitRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitRowView.swift; sourceTree = "<group>"; };
+		AA000021 /* AddHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddHabitView.swift; sourceTree = "<group>"; };
+		AA000023 /* HabitDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitDetailView.swift; sourceTree = "<group>"; };
+		AA000025 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA000034 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA000008 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AA000031 /* root */ = {
+			isa = PBXGroup;
+			children = (
+				AA000003 /* LoopHabits */,
+				AA000004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA000003 /* LoopHabits */ = {
+			isa = PBXGroup;
+			children = (
+				AA000013 /* LoopHabitsApp.swift */,
+				AA000029 /* Models */,
+				AA000030 /* Views */,
+				AA000036 /* Extensions */,
+				AA000025 /* Assets.xcassets */,
+			);
+			path = LoopHabits;
+			sourceTree = "<group>";
+		};
+		AA000004 /* Products */ = {
+			isa = PBXGroup;
+			children = (AA000005 /* LoopHabits.app */);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AA000029 /* Models */ = {
+			isa = PBXGroup;
+			children = (AA000015 /* Habit.swift */);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AA000030 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA000017 /* HabitListView.swift */,
+				AA000019 /* HabitRowView.swift */,
+				AA000021 /* AddHabitView.swift */,
+				AA000023 /* HabitDetailView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AA000036 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (AA000034 /* Color+Hex.swift */);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA000002 /* LoopHabits */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA000012;
+			buildPhases = (
+				AA000006 /* Sources */,
+				AA000007 /* Resources */,
+				AA000008 /* Frameworks */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = LoopHabits;
+			productName = LoopHabits;
+			productReference = AA000005 /* LoopHabits.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					AA000002 = { CreatedOnToolsVersion = 15.0; };
+				};
+			};
+			buildConfigurationList = AA000011;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base);
+			mainGroup = AA000031;
+			productRefGroup = AA000004;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (AA000002 /* LoopHabits */);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA000007 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (AA000026 /* Assets.xcassets in Resources */);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA000006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000014 /* LoopHabitsApp.swift in Sources */,
+				AA000016 /* Habit.swift in Sources */,
+				AA000018 /* HabitListView.swift in Sources */,
+				AA000020 /* HabitRowView.swift in Sources */,
+				AA000022 /* AddHabitView.swift in Sources */,
+				AA000024 /* HabitDetailView.swift in Sources */,
+				AA000035 /* Color+Hex.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AA000009 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA000010 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AA000032 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.loophabits.ios";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AA000033 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.loophabits.ios";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA000011 /* Build configuration list for PBXProject "LoopHabits" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (AA000009 /* Debug */, AA000010 /* Release */);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA000012 /* Build configuration list for PBXNativeTarget "LoopHabits" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (AA000032 /* Debug */, AA000033 /* Release */);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = AA000001 /* Project object */;
+}
