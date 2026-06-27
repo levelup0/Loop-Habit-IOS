@@ -19,7 +19,14 @@ struct HabitDetailView: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Изменить") { showingEdit = true }
+                Menu {
+                    Button("Изменить") { showingEdit = true }
+                    Button(habit.isArchived ? "Восстановить" : "Архивировать") {
+                        habit.isArchived.toggle()
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
             }
         }
         .sheet(isPresented: $showingEdit) {

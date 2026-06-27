@@ -9,6 +9,7 @@ final class Habit {
     var daysOfWeek: [Int]   // 1=Mon … 7=Sun
     var createdAt: Date
     var sortOrder: Int
+    var isArchived: Bool
     @Relationship(deleteRule: .cascade) var entries: [HabitEntry]
 
     init(name: String, colorHex: String = "#5856D6", daysOfWeek: [Int] = Array(1...7), sortOrder: Int = 0) {
@@ -18,6 +19,7 @@ final class Habit {
         self.daysOfWeek = daysOfWeek
         self.createdAt = Date()
         self.sortOrder = sortOrder
+        self.isArchived = false
         self.entries = []
     }
 
