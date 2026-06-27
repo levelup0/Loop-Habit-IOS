@@ -15,6 +15,7 @@
 		AA000024 /* HabitDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000023; };
 		AA000026 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000025; };
 		AA000035 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000034; };
+		AA000037 /* EditHabitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000038; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +28,7 @@
 		AA000023 /* HabitDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitDetailView.swift; sourceTree = "<group>"; };
 		AA000025 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA000034 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+		AA000038 /* EditHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditHabitView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,6 +80,7 @@
 				AA000019 /* HabitRowView.swift */,
 				AA000021 /* AddHabitView.swift */,
 				AA000023 /* HabitDetailView.swift */,
+				AA000038 /* EditHabitView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -153,6 +156,7 @@
 				AA000022 /* AddHabitView.swift in Sources */,
 				AA000024 /* HabitDetailView.swift in Sources */,
 				AA000035 /* Color+Hex.swift in Sources */,
+				AA000037 /* EditHabitView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
