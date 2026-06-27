@@ -29,6 +29,7 @@
 		AA000050B /* NumberButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000050A; };
 		AA000051B /* NumberEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000051A; };
 		AA000052B /* ReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000052A; };
+		AA000054B /* DatabaseImportExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000054A; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +57,7 @@
 		AA000050A /* NumberButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberButton.swift; sourceTree = "<group>"; };
 		AA000051A /* NumberEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberEntrySheet.swift; sourceTree = "<group>"; };
 		AA000052A /* ReminderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderManager.swift; sourceTree = "<group>"; };
+		AA000054A /* DatabaseImportExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseImportExport.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +149,7 @@
 			isa = PBXGroup;
 			children = (
 				AA000052A /* ReminderManager.swift */,
+				AA000054A /* DatabaseImportExport.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -230,6 +233,7 @@
 				AA000050B /* NumberButton.swift in Sources */,
 				AA000051B /* NumberEntrySheet.swift in Sources */,
 				AA000052B /* ReminderManager.swift in Sources */,
+				AA000054B /* DatabaseImportExport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

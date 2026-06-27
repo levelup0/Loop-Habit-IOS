@@ -12,7 +12,7 @@ enum CheckmarkValue: Int {
 @Model
 final class HabitEntry {
     var id: UUID
-    var habitID: UUID        // back-reference for @Query filtering
+    var habitID: UUID = UUID()  // back-reference for @Query filtering; default allows auto-migration
     var date: Date
     var value: Int           // CheckmarkValue raw value; 2 = yesManual
     var numericValue: Double // for Measurable habits; 0 = not set
