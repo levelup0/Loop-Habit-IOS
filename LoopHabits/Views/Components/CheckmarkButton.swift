@@ -19,41 +19,40 @@ struct CheckmarkButton: View {
     let isToday: Bool
     let onTap: () -> Void
 
-    private var isDone: Bool  { value == CheckmarkValue.yesManual.rawValue || value == CheckmarkValue.yesAuto.rawValue }
-    private var isSkip: Bool  { value == CheckmarkValue.skip.rawValue }
+    private var isDone: Bool   { value == CheckmarkValue.yesManual.rawValue }
+    private var isAuto: Bool   { value == CheckmarkValue.yesAuto.rawValue }
+    private var isSkip: Bool   { value == CheckmarkValue.skip.rawValue }
 
     var body: some View {
         Button(action: onTap) {
             ZStack {
                 if isDone {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(color)
-                        .frame(width: 34, height: 34)
+                    // YES_MANUAL: solid filled checkmark, habit color
                     Image(systemName: "checkmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(.white)
+                        .font(.system(size: 20, weight: .black))
+                        .foregroundStyle(color)
+                } else if isAuto {
+                    // YES_AUTO: outlined/hollow checkmark — achieved via stacked icons
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 18, weight: .black))
+                        .foregroundStyle(color.opacity(0.45))
                 } else if isSkip {
-                    RoundedRectangle(cornerRadius: 4)
-                        .strokeBorder(color.opacity(0.5), lineWidth: 1.5)
-                        .frame(width: 34, height: 34)
-                    // Horizontal dash for SKIP
-                    Rectangle()
-                        .fill(color.opacity(0.6))
-                        .frame(width: 14, height: 2)
+                    // SKIP: thick horizontal dash, habit color
+                    Image(systemName: "minus")
+                        .font(.system(size: 20, weight: .black))
+                        .foregroundStyle(color)
                 } else if isScheduled {
-                    RoundedRectangle(cornerRadius: 4)
-                        .strokeBorder(color.opacity(isToday ? 0.7 : 0.35), lineWidth: 1.5)
-                        .frame(width: 34, height: 34)
+                    // NO but scheduled: faint X
                     Image(systemName: "xmark")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(color.opacity(0.35))
-                } else {
-                    Color.clear.frame(width: 34, height: 34)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(isToday ? color.opacity(0.55) : color.opacity(0.25))
                 }
+                // Unscheduled: empty
             }
+            .frame(width: columnWidth, height: rowHeight)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .frame(width: 40)
-        .animation(.easeInOut(duration: 0.12), value: value)
+        .animation(.easeInOut(duration: 0.1), value: value)
     }
 }

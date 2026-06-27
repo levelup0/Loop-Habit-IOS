@@ -1,41 +1,52 @@
 import SwiftUI
 
 struct NumberButton: View {
-    let value: Double?   // nil = not entered
-    let unit: String
+    let value: Double?        // nil = not entered
+    let targetValue: Double
+    let targetType: TargetType
     let color: Color
     let isToday: Bool
     let onTap: () -> Void
+
+    private var meetsTarget: Bool {
+        guard let v = value, targetValue > 0 else { return value != nil && value! > 0 }
+        switch targetType {
+        case .atLeast: return v >= targetValue
+        case .atMost:  return v <= targetValue
+        }
+    }
+
+    private var displayColor: Color {
+        guard let v = value, v > 0 else { return color.opacity(isToday ? 0.55 : 0.25) }
+        return meetsTarget ? color : Color.secondary
+    }
 
     var body: some View {
         Button(action: onTap) {
             ZStack {
                 if let v = value, v > 0 {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(color)
-                        .frame(width: 34, height: 34)
                     Text(formattedValue(v))
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(.white)
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundStyle(displayColor)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.6)
-                        .frame(width: 30)
+                        .minimumScaleFactor(0.5)
                 } else {
-                    RoundedRectangle(cornerRadius: 4)
-                        .strokeBorder(color.opacity(isToday ? 0.7 : 0.35), lineWidth: 1.5)
-                        .frame(width: 34, height: 34)
+                    // No value yet — show plus sign like Android
                     Image(systemName: "plus")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(color.opacity(0.5))
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(isToday ? color.opacity(0.55) : color.opacity(0.25))
                 }
             }
+            .frame(width: columnWidth, height: rowHeight)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .frame(width: 40)
-        .animation(.easeInOut(duration: 0.12), value: value)
+        .animation(.easeInOut(duration: 0.1), value: value)
     }
 
     private func formattedValue(_ v: Double) -> String {
-        v.truncatingRemainder(dividingBy: 1) == 0 ? "\(Int(v))" : String(format: "%.1f", v)
+        if v >= 1000 { return String(format: "%.0fk", v / 1000) }
+        if v.truncatingRemainder(dividingBy: 1) == 0 { return "\(Int(v))" }
+        return String(format: "%.1f", v)
     }
 }

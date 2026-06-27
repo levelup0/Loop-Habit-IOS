@@ -9,6 +9,10 @@ enum SortMode: String, CaseIterable {
     case status  = "By status"
 }
 
+let columnWidth: CGFloat = 40
+let rowHeight:   CGFloat = 56
+let headerHeight: CGFloat = 44
+
 struct HabitListView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: [SortDescriptor(\Habit.sortOrder), SortDescriptor(\Habit.createdAt)]) private var habits: [Habit]
@@ -23,7 +27,7 @@ struct HabitListView: View {
     @State private var hideArchived = true
     @State private var sortMode: SortMode = .manual
 
-    // Last 60 days, most recent first (rightmost column = today)
+    // Today is index 0 (leftmost). Dates go: today, yesterday, ...59 days ago
     private var visibleDates: [Date] {
         let today = Calendar.current.startOfDay(for: .now)
         return (0..<60).compactMap { Calendar.current.date(byAdding: .day, value: -$0, to: today) }
@@ -91,46 +95,52 @@ struct HabitListView: View {
         }
     }
 
-    // MARK: - Habit grid (fixed left column + shared horizontal scroll)
+    // MARK: - Habit grid
 
     private var habitGrid: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            HStack(alignment: .top, spacing: 0) {
-                // Left: fixed label column
-                LazyVStack(spacing: 0) {
-                    Color.clear.frame(height: 44)  // spacer matching date header height
-                    ForEach(displayedHabits) { habit in
-                        NavigationLink(destination: HabitDetailView(habit: habit)) {
-                            HabitLabelCell(habit: habit)
-                        }
-                        .buttonStyle(.plain)
-                        .contextMenu {
-                            Button(habit.isArchived ? "Unarchive" : "Archive") {
-                                habit.isArchived.toggle()
-                            }
-                            Button("Delete", role: .destructive) {
-                                context.delete(habit)
-                            }
-                        }
-                        Divider().opacity(0.3)
-                    }
-                }
-                .frame(width: 180)
+        GeometryReader { geo in
+            let labelWidth = geo.size.width - columnWidth * 7  // show ~7 columns by default
+            let clampedLabel = max(120, min(200, labelWidth))
 
-                // Right: single shared horizontal scroll for all date columns
-                // scrollTargetBehavior(.viewAligned) gives discrete per-column snapping
-                ScrollView(.horizontal, showsIndicators: false) {
+            ScrollView(.vertical, showsIndicators: false) {
+                HStack(alignment: .top, spacing: 0) {
+                    // Fixed left label column
                     LazyVStack(spacing: 0) {
-                        DateHeaderRow(dates: visibleDates)
+                        Color.clear.frame(height: headerHeight)
                         ForEach(displayedHabits) { habit in
-                            HabitDatesRow(habit: habit, dates: visibleDates)
+                            NavigationLink(destination: HabitDetailView(habit: habit)) {
+                                HabitLabelCell(habit: habit)
+                            }
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                Button(habit.isArchived ? "Unarchive" : "Archive") {
+                                    habit.isArchived.toggle()
+                                }
+                                Button("Delete", role: .destructive) {
+                                    context.delete(habit)
+                                }
+                            }
                             Divider().opacity(0.3)
                         }
                     }
-                    .scrollTargetLayout()
+                    .frame(width: clampedLabel)
+
+                    // Shared horizontal scroll — today is leftmost (index 0)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        VStack(spacing: 0) {
+                            DateHeaderRow(dates: visibleDates)
+                            ForEach(displayedHabits) { habit in
+                                HabitDatesRow(habit: habit, dates: visibleDates)
+                                Divider().opacity(0.3)
+                            }
+                        }
+                        .frame(width: columnWidth * CGFloat(visibleDates.count))
+                    }
+                    // Discrete snapping: each column = columnWidth
+                    .scrollTargetBehavior(.paging)
+                    // Start at left edge = today
+                    .defaultScrollAnchor(.leading)
                 }
-                .scrollTargetBehavior(.viewAligned)
-                .defaultScrollAnchor(.trailing)
             }
         }
     }
@@ -192,7 +202,7 @@ struct HabitLabelCell: View {
         }
         .padding(.leading, 16)
         .padding(.trailing, 8)
-        .frame(height: 56)
+        .frame(height: rowHeight)
     }
 }
 
@@ -204,19 +214,18 @@ struct DateHeaderRow: View {
     var body: some View {
         HStack(spacing: 0) {
             ForEach(dates, id: \.self) { date in
+                let isToday = Calendar.current.isDateInToday(date)
                 VStack(spacing: 1) {
                     Text(date.formatted(.dateTime.weekday(.abbreviated)).uppercased())
                         .font(.system(size: 9, weight: .medium))
                     Text(date.formatted(.dateTime.day()))
                         .font(.system(size: 14, weight: .semibold))
                 }
-                .foregroundStyle(
-                    Calendar.current.isDateInToday(date) ? Color.primary : Color.secondary
-                )
-                .frame(width: 40)
+                .foregroundStyle(isToday ? Color.primary : Color.secondary)
+                .frame(width: columnWidth)
             }
         }
-        .frame(height: 44)
+        .frame(height: headerHeight)
     }
 }
 
@@ -231,19 +240,22 @@ struct HabitDatesRow: View {
     @State private var numberSheetDate: Date = .now
     @State private var numberSheetEntry: HabitEntry? = nil
     @State private var numberResult: Double? = nil
+    // Bump to force re-render after SwiftData mutations
+    @State private var tick: Int = 0
 
     private var habitColor: Color { Color(hex: habit.colorHex) ?? .accentColor }
     private let cal = Calendar.current
 
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(dates, id: \.self) { date in
+            ForEach(Array(dates.enumerated()), id: \.offset) { idx, date in
                 let entry = habit.entries.first(where: { cal.isDate($0.date, inSameDayAs: date) })
                 if habit.habitType == .measurable {
                     let numVal: Double? = entry.flatMap { $0.numericValue > 0 ? $0.numericValue : nil }
                     NumberButton(
                         value: numVal,
-                        unit: habit.unit,
+                        targetValue: habit.targetValue,
+                        targetType: habit.targetType,
                         color: habitColor,
                         isToday: cal.isDateInToday(date),
                         onTap: {
@@ -253,18 +265,20 @@ struct HabitDatesRow: View {
                         }
                     )
                 } else {
-                    let currentValue = entry?.value ?? CheckmarkValue.no.rawValue
+                    // Compute effective value (accounting for YES_AUTO)
+                    let effectiveVal = effectiveValue(for: date, entry: entry)
                     CheckmarkButton(
-                        value: currentValue,
+                        value: effectiveVal,
                         isScheduled: habit.isScheduled(on: date),
                         color: habitColor,
                         isToday: cal.isDateInToday(date),
-                        onTap: { cycle(date: date, entry: entry, current: currentValue) }
+                        onTap: { cycle(date: date, entry: entry) }
                     )
                 }
             }
         }
-        .frame(height: 56)
+        .frame(height: rowHeight)
+        .id(tick)  // force redraw when tick changes
         .sheet(isPresented: $showingNumberSheet) {
             NumberEntrySheet(
                 habitName: habit.name,
@@ -282,11 +296,57 @@ struct HabitDatesRow: View {
         }
     }
 
-    // Mirrors Android Entry.nextToggleValue(): NO→YES_MANUAL→SKIP→NO
-    private func cycle(date: Date, entry: HabitEntry?, current: Int) {
-        let next = nextCheckmarkValue(current)
+    // YES_AUTO: if habit has period-based frequency and period is already satisfied,
+    // untracked days in that period show as yesAuto
+    private func effectiveValue(for date: Date, entry: HabitEntry?) -> Int {
+        if let e = entry { return e.value }
+
+        // Only compute auto for period-based types
+        guard habit.frequencyType == .timesPerWeek ||
+              habit.frequencyType == .timesPerMonth ||
+              habit.frequencyType == .timesInPeriod else {
+            return CheckmarkValue.no.rawValue
+        }
+
+        let periodDays: Int
+        switch habit.frequencyType {
+        case .timesPerWeek:  periodDays = 7
+        case .timesPerMonth: periodDays = 30
+        case .timesInPeriod: periodDays = max(1, habit.frequencyDenominator)
+        default: return CheckmarkValue.no.rawValue
+        }
+        let needed = habit.frequencyNumerator
+
+        // Find the period window that contains this date
+        guard let windowStart = cal.date(byAdding: .day, value: -(periodDays - 1), to: date),
+              let windowEnd   = cal.date(byAdding: .day, value:  (periodDays - 1), to: date) else {
+            return CheckmarkValue.no.rawValue
+        }
+
+        // Count YES_MANUAL entries whose period window overlaps this date
+        let manualInWindow = habit.entries.filter { e in
+            guard e.value == CheckmarkValue.yesManual.rawValue else { return false }
+            let eDay = cal.startOfDay(for: e.date)
+            guard let eWindowStart = cal.date(byAdding: .day, value: -(periodDays - 1), to: eDay),
+                  let eWindowEnd   = cal.date(byAdding: .day, value:  (periodDays - 1), to: eDay) else { return false }
+            // Check overlap: entry's window overlaps our date
+            return eDay >= windowStart && eDay <= windowEnd
+        }
+
+        return manualInWindow.count >= needed ? CheckmarkValue.yesAuto.rawValue : CheckmarkValue.no.rawValue
+    }
+
+    // Cycle: NO→YES_MANUAL→SKIP→NO (only YES_MANUAL is stored; YES_AUTO and NO have no entry)
+    private func cycle(date: Date, entry: HabitEntry?) {
+        // Determine current stored value (ignore yesAuto — it's computed, not stored)
+        let storedVal = entry?.value ?? CheckmarkValue.no.rawValue
+        let next = nextCheckmarkValue(storedVal)
+
         if next == CheckmarkValue.no.rawValue {
-            if let e = entry { context.delete(e) }
+            if let e = entry {
+                context.delete(e)
+                habit.entries.removeAll { $0.id == e.id }
+            }
         } else if let e = entry {
             e.value = next
         } else {
@@ -294,14 +354,16 @@ struct HabitDatesRow: View {
             context.insert(e)
             habit.entries.append(e)
         }
+        tick += 1
     }
 
     private func commitNumeric(date: Date, entry: HabitEntry?, newValue: Double) {
         if newValue <= 0 {
-            if let e = entry { context.delete(e) }
-            return
-        }
-        if let e = entry {
+            if let e = entry {
+                context.delete(e)
+                habit.entries.removeAll { $0.id == e.id }
+            }
+        } else if let e = entry {
             e.numericValue = newValue
             e.value = CheckmarkValue.yesManual.rawValue
         } else {
@@ -309,6 +371,7 @@ struct HabitDatesRow: View {
             context.insert(e)
             habit.entries.append(e)
         }
+        tick += 1
     }
 }
 
