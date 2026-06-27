@@ -110,18 +110,27 @@ struct HabitListView: View {
                     }
                     .frame(width: labelWidth)
 
-                    // Shared horizontal scroll — today is leftmost
+                    // Shared horizontal scroll — today is leftmost, snaps per column
                     ScrollView(.horizontal, showsIndicators: false) {
-                        VStack(spacing: 0) {
-                            DateHeaderRow(dates: visibleDates)
-                            ForEach(displayedHabits) { habit in
-                                HabitDatesRow(habit: habit, dates: visibleDates)
-                                Divider().opacity(0.3)
+                        // Outer LazyHStack: one item per day column, each columnWidth wide.
+                        // .scrollTargetLayout() on this makes .viewAligned snap column-by-column.
+                        LazyHStack(spacing: 0) {
+                            ForEach(Array(visibleDates.enumerated()), id: \.offset) { idx, date in
+                                VStack(spacing: 0) {
+                                    // Header cell
+                                    DateHeaderCell(date: date)
+                                    // One cell per habit
+                                    ForEach(displayedHabits) { habit in
+                                        HabitDayCell(habit: habit, date: date)
+                                        Divider().opacity(0.3)
+                                    }
+                                }
+                                .frame(width: columnWidth)
                             }
                         }
-                        .frame(width: columnWidth * CGFloat(visibleDates.count))
+                        .scrollTargetLayout()
                     }
-                    .scrollTargetBehavior(.paging)
+                    .scrollTargetBehavior(.viewAligned)
                     .defaultScrollAnchor(.leading)
                 }
             }
@@ -172,42 +181,21 @@ struct HabitLabelCell: View {
     }
 }
 
-// MARK: - DateHeaderRow
+// MARK: - DateHeaderCell (single column)
 
-struct DateHeaderRow: View {
-    let dates: [Date]
-
-    var body: some View {
-        HStack(spacing: 0) {
-            ForEach(dates, id: \.self) { date in
-                let isToday = Calendar.current.isDateInToday(date)
-                VStack(spacing: 1) {
-                    Text(date.formatted(.dateTime.weekday(.abbreviated)).uppercased())
-                        .font(.system(size: 9, weight: .medium))
-                    Text(date.formatted(.dateTime.day()))
-                        .font(.system(size: 14, weight: .semibold))
-                }
-                .foregroundStyle(isToday ? Color.primary : Color.secondary)
-                .frame(width: columnWidth)
-            }
-        }
-        .frame(height: headerHeight)
-    }
-}
-
-// MARK: - HabitDatesRow
-
-struct HabitDatesRow: View {
-    let habit: Habit
-    let dates: [Date]
+struct DateHeaderCell: View {
+    let date: Date
 
     var body: some View {
-        HStack(spacing: 0) {
-            ForEach(dates, id: \.self) { date in
-                HabitDayCell(habit: habit, date: date)
-            }
+        let isToday = Calendar.current.isDateInToday(date)
+        VStack(spacing: 1) {
+            Text(date.formatted(.dateTime.weekday(.abbreviated)).uppercased())
+                .font(.system(size: 9, weight: .medium))
+            Text(date.formatted(.dateTime.day()))
+                .font(.system(size: 14, weight: .semibold))
         }
-        .frame(height: rowHeight)
+        .foregroundStyle(isToday ? Color.primary : Color.secondary)
+        .frame(width: columnWidth, height: headerHeight)
     }
 }
 
