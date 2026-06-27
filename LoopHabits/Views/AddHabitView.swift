@@ -5,6 +5,8 @@ struct AddHabitView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
 
+    var nextSortOrder: Int = 0
+
     @State private var name = ""
     @State private var colorHex = "#5856D6"
     @State private var selectedDays: Set<Int> = Set(1...7)
@@ -78,7 +80,8 @@ struct AddHabitView: View {
         let habit = Habit(
             name: name.trimmingCharacters(in: .whitespaces),
             colorHex: colorHex,
-            daysOfWeek: Array(selectedDays).sorted()
+            daysOfWeek: Array(selectedDays).sorted(),
+            sortOrder: nextSortOrder
         )
         context.insert(habit)
         dismiss()

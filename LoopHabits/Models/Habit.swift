@@ -8,14 +8,16 @@ final class Habit {
     var colorHex: String
     var daysOfWeek: [Int]   // 1=Mon … 7=Sun
     var createdAt: Date
+    var sortOrder: Int
     @Relationship(deleteRule: .cascade) var entries: [HabitEntry]
 
-    init(name: String, colorHex: String = "#5856D6", daysOfWeek: [Int] = Array(1...7)) {
+    init(name: String, colorHex: String = "#5856D6", daysOfWeek: [Int] = Array(1...7), sortOrder: Int = 0) {
         self.id = UUID()
         self.name = name
         self.colorHex = colorHex
         self.daysOfWeek = daysOfWeek
         self.createdAt = Date()
+        self.sortOrder = sortOrder
         self.entries = []
     }
 

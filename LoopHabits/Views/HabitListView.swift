@@ -3,7 +3,7 @@ import SwiftData
 
 struct HabitListView: View {
     @Environment(\.modelContext) private var context
-    @Query(sort: \Habit.createdAt) private var habits: [Habit]
+    @Query(sort: [SortDescriptor(\Habit.sortOrder), SortDescriptor(\Habit.createdAt)]) private var habits: [Habit]
     @State private var showingAdd = false
 
     var body: some View {
@@ -15,6 +15,7 @@ struct HabitListView: View {
                     }
                 }
                 .onDelete(perform: delete)
+                .onMove(perform: move)
             }
             .navigationTitle("Привычки")
             .toolbar {
@@ -26,7 +27,7 @@ struct HabitListView: View {
                 }
             }
             .sheet(isPresented: $showingAdd) {
-                AddHabitView()
+                AddHabitView(nextSortOrder: habits.count)
             }
             .overlay {
                 if habits.isEmpty {
@@ -42,6 +43,14 @@ struct HabitListView: View {
 
     private func delete(at offsets: IndexSet) {
         offsets.forEach { context.delete(habits[$0]) }
+    }
+
+    private func move(from source: IndexSet, to destination: Int) {
+        var reordered = habits
+        reordered.move(fromOffsets: source, toOffset: destination)
+        for (index, habit) in reordered.enumerated() {
+            habit.sortOrder = index
+        }
     }
 }
 
