@@ -41,7 +41,7 @@ struct HabitDetailView: View {
             HStack {
                 stat("\(habit.currentStreak)", "Серия")
                 Divider().frame(height: 40)
-                stat("\(habit.bestStreak)", "Рекорд")
+                stat("\(habit.bestStreakLength)", "Рекорд")
                 Divider().frame(height: 40)
                 stat(completionRate, "За 90 дней")
                 Divider().frame(height: 40)

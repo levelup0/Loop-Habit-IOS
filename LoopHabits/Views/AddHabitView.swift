@@ -80,9 +80,10 @@ struct AddHabitView: View {
         let habit = Habit(
             name: name.trimmingCharacters(in: .whitespaces),
             colorHex: colorHex,
-            daysOfWeek: Array(selectedDays).sorted(),
-            sortOrder: nextSortOrder
+            sortOrder: nextSortOrder,
+            frequencyType: .specificDays
         )
+        habit.daysOfWeek = Array(selectedDays).sorted()
         context.insert(habit)
         dismiss()
     }
