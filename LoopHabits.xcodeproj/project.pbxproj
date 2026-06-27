@@ -18,6 +18,8 @@
 		AA000037 /* EditHabitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000038; };
 		AA000039B /* HabitEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000039A; };
 		AA000040B /* HabitTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000040A; };
+		AA000041B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000041A; };
+		AA000042B /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000042A; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,9 +32,12 @@
 		AA000023 /* HabitDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitDetailView.swift; sourceTree = "<group>"; };
 		AA000025 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA000034 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+		AA000042A /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
 		AA000038 /* EditHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditHabitView.swift; sourceTree = "<group>"; };
 		AA000039A /* HabitEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitEntry.swift; sourceTree = "<group>"; };
 		AA000040A /* HabitTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitTypes.swift; sourceTree = "<group>"; };
+		AA000041A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AA000042A /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,13 +94,17 @@
 				AA000021 /* AddHabitView.swift */,
 				AA000023 /* HabitDetailView.swift */,
 				AA000038 /* EditHabitView.swift */,
+				AA000041A /* SettingsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
 		AA000036 /* Extensions */ = {
 			isa = PBXGroup;
-			children = (AA000034 /* Color+Hex.swift */);
+			children = (
+					AA000034 /* Color+Hex.swift */,
+					AA000042A /* AppColors.swift */,
+				);
 			path = Extensions;
 			sourceTree = "<group>";
 		};
@@ -167,6 +176,8 @@
 				AA000037 /* EditHabitView.swift in Sources */,
 				AA000039B /* HabitEntry.swift in Sources */,
 				AA000040B /* HabitTypes.swift in Sources */,
+				AA000041B /* SettingsView.swift in Sources */,
+				AA000042B /* AppColors.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
