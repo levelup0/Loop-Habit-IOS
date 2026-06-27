@@ -1,88 +1,254 @@
 import SwiftUI
 import SwiftData
 
+enum SortMode: String, CaseIterable {
+    case manual  = "Manually"
+    case name    = "By name"
+    case color   = "By color"
+    case score   = "By score"
+    case status  = "By status"
+}
+
 struct HabitListView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: [SortDescriptor(\Habit.sortOrder), SortDescriptor(\Habit.createdAt)]) private var habits: [Habit]
-    @State private var showingAdd = false
-    @State private var showingArchive = false
 
-    private var activeHabits: [Habit] { habits.filter { !$0.isArchived } }
-    private var archivedHabits: [Habit] { habits.filter { $0.isArchived } }
-    private var displayedHabits: [Habit] { showingArchive ? archivedHabits : activeHabits }
+    @AppStorage("hideCompleted") private var hideCompleted = false
+    @AppStorage("isDarkMode") private var isDarkMode = true
+
+    @State private var showingTypeSelector = false
+    @State private var selectedHabitType: HabitType? = nil
+    @State private var showingCreate = false
+    @State private var showingSettings = false
+    @State private var hideArchived = true
+    @State private var sortMode: SortMode = .manual
+
+    // Last 60 days, most recent first (rightmost column = today)
+    private var visibleDates: [Date] {
+        let today = Calendar.current.startOfDay(for: .now)
+        return (0..<60).compactMap { Calendar.current.date(byAdding: .day, value: -$0, to: today) }
+    }
+
+    private var displayedHabits: [Habit] {
+        var list = habits.filter { hideArchived ? !$0.isArchived : true }
+        if hideCompleted { list = list.filter { !$0.completedToday } }
+        switch sortMode {
+        case .manual:  break
+        case .name:    list.sort { $0.name.localizedCompare($1.name) == .orderedAscending }
+        case .color:   list.sort { $0.colorHex < $1.colorHex }
+        case .score:   list.sort { $0.score > $1.score }
+        case .status:  list.sort { $0.completedToday && !$1.completedToday }
+        }
+        return list
+    }
 
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(displayedHabits) { habit in
-                    NavigationLink(destination: HabitDetailView(habit: habit)) {
-                        HabitRowView(habit: habit)
-                    }
-                    .swipeActions(edge: .leading) {
-                        Button {
-                            habit.isArchived.toggle()
-                        } label: {
-                            Label(
-                                habit.isArchived ? "Восстановить" : "Архив",
-                                systemImage: habit.isArchived ? "tray.and.arrow.up" : "archivebox"
-                            )
-                        }
-                        .tint(habit.isArchived ? .green : .orange)
-                    }
+            ZStack(alignment: .top) {
+                Color(UIColor.systemBackground).ignoresSafeArea()
+
+                if displayedHabits.isEmpty {
+                    emptyState
+                } else {
+                    habitGrid
                 }
-                .onDelete(perform: delete)
-                .onMove(perform: showingArchive ? nil : move)
             }
-            .navigationTitle(showingArchive ? "Архив" : "Привычки")
+            .navigationTitle("Habits")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if !showingArchive {
-                        Button { showingAdd = true } label: { Image(systemName: "plus") }
+                    Button { showingTypeSelector = true } label: {
+                        Image(systemName: "plus")
+                            .font(.body.weight(.semibold))
                     }
                 }
-                ToolbarItem(placement: .navigationBarLeading) {
-                    if !showingArchive {
-                        EditButton()
-                    }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    filterMenu
                 }
-                ToolbarItem(placement: .bottomBar) {
-                    Button {
-                        showingArchive.toggle()
-                    } label: {
-                        Label(
-                            showingArchive ? "Активные привычки" : "Показать архив (\(archivedHabits.count))",
-                            systemImage: showingArchive ? "list.bullet" : "archivebox"
-                        )
-                        .font(.caption)
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { showingSettings = true } label: {
+                        Image(systemName: "ellipsis.circle")
                     }
-                    .foregroundStyle(.secondary)
                 }
             }
-            .sheet(isPresented: $showingAdd) {
-                AddHabitView(nextSortOrder: habits.count)
+            .sheet(isPresented: $showingTypeSelector) {
+                HabitTypePickerSheet(selectedType: $selectedHabitType)
+                    .onChange(of: selectedHabitType) { _, newType in
+                        if newType != nil {
+                            showingTypeSelector = false
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                showingCreate = true
+                            }
+                        }
+                    }
             }
-            .overlay {
-                if displayedHabits.isEmpty {
-                    ContentUnavailableView(
-                        showingArchive ? "Архив пуст" : "Нет привычек",
-                        systemImage: showingArchive ? "archivebox" : "checkmark.circle",
-                        description: Text(showingArchive ? "Архивированные привычки появятся здесь" : "Нажмите + чтобы добавить первую привычку")
-                    )
-                }
+            .sheet(isPresented: $showingCreate, onDismiss: { selectedHabitType = nil }) {
+                CreateHabitView(type: selectedHabitType ?? .yesNo, nextSortOrder: habits.count)
+            }
+            .navigationDestination(isPresented: $showingSettings) {
+                SettingsView()
             }
         }
     }
 
-    private func delete(at offsets: IndexSet) {
-        let source = displayedHabits
-        offsets.forEach { context.delete(source[$0]) }
+    // MARK: - Habit grid (fixed left column + shared horizontal scroll)
+
+    private var habitGrid: some View {
+        ScrollView(.vertical, showsIndicators: false) {
+            HStack(alignment: .top, spacing: 0) {
+                // Left: fixed label column
+                LazyVStack(spacing: 0) {
+                    Color.clear.frame(height: 44)  // spacer matching date header height
+                    ForEach(displayedHabits) { habit in
+                        NavigationLink(destination: HabitDetailView(habit: habit)) {
+                            HabitLabelCell(habit: habit)
+                        }
+                        .buttonStyle(.plain)
+                        .contextMenu {
+                            Button(habit.isArchived ? "Unarchive" : "Archive") {
+                                habit.isArchived.toggle()
+                            }
+                            Button("Delete", role: .destructive) {
+                                context.delete(habit)
+                            }
+                        }
+                        Divider().opacity(0.3)
+                    }
+                }
+                .frame(width: 180)
+
+                // Right: single shared horizontal scroll for all date columns
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyVStack(spacing: 0) {
+                        DateHeaderRow(dates: visibleDates)
+                        ForEach(displayedHabits) { habit in
+                            HabitDatesRow(habit: habit, dates: visibleDates)
+                            Divider().opacity(0.3)
+                        }
+                    }
+                }
+                .defaultScrollAnchor(.trailing)
+            }
+        }
     }
 
-    private func move(from source: IndexSet, to destination: Int) {
-        var reordered = activeHabits
-        reordered.move(fromOffsets: source, toOffset: destination)
-        for (index, habit) in reordered.enumerated() {
-            habit.sortOrder = index
+    // MARK: - Filter menu
+
+    private var filterMenu: some View {
+        Menu {
+            Toggle("Hide archived", isOn: $hideArchived)
+            Toggle("Hide entered today", isOn: $hideCompleted)
+            Divider()
+            Menu("Sort") {
+                Picker("Sort", selection: $sortMode) {
+                    ForEach(SortMode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .pickerStyle(.inline)
+            }
+        } label: {
+            Image(systemName: "line.3.horizontal.decrease.circle")
+        }
+    }
+
+    // MARK: - Empty state
+
+    private var emptyState: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            Image(systemName: "checkmark.circle")
+                .font(.system(size: 56))
+                .foregroundStyle(.secondary)
+            Text("No habits yet")
+                .font(.title3.bold())
+            Text("Tap + to add your first habit")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Spacer()
+        }
+    }
+}
+
+// MARK: - HabitLabelCell
+
+struct HabitLabelCell: View {
+    let habit: Habit
+
+    private var habitColor: Color { Color(hex: habit.colorHex) ?? .accentColor }
+
+    var body: some View {
+        HStack(spacing: 10) {
+            ScoreRingView(score: habit.score, color: habitColor, size: 32, lineWidth: 3.5)
+            Text(habit.name)
+                .font(.body)
+                .foregroundStyle(habitColor)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+            Spacer(minLength: 0)
+        }
+        .padding(.leading, 16)
+        .padding(.trailing, 8)
+        .frame(height: 56)
+    }
+}
+
+// MARK: - DateHeaderRow
+
+struct DateHeaderRow: View {
+    let dates: [Date]
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(dates, id: \.self) { date in
+                VStack(spacing: 1) {
+                    Text(date.formatted(.dateTime.weekday(.abbreviated)).uppercased())
+                        .font(.system(size: 9, weight: .medium))
+                    Text(date.formatted(.dateTime.day()))
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .foregroundStyle(
+                    Calendar.current.isDateInToday(date) ? Color.primary : Color.secondary
+                )
+                .frame(width: 40)
+            }
+        }
+        .frame(height: 44)
+    }
+}
+
+// MARK: - HabitDatesRow
+
+struct HabitDatesRow: View {
+    @Environment(\.modelContext) private var context
+    let habit: Habit
+    let dates: [Date]
+
+    private var habitColor: Color { Color(hex: habit.colorHex) ?? .accentColor }
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(dates, id: \.self) { date in
+                CheckmarkButton(
+                    isScheduled: habit.isScheduled(on: date),
+                    isDone: habit.completed(on: date),
+                    color: habitColor,
+                    isToday: Calendar.current.isDateInToday(date),
+                    onTap: { toggle(date) }
+                )
+            }
+        }
+        .frame(height: 56)
+    }
+
+    private func toggle(_ date: Date) {
+        let cal = Calendar.current
+        if let entry = habit.entries.first(where: { cal.isDate($0.date, inSameDayAs: date) }) {
+            context.delete(entry)
+        } else {
+            let entry = HabitEntry(date: date, value: .yesManual)
+            context.insert(entry)
+            habit.entries.append(entry)
         }
     }
 }
