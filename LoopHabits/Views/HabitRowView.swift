@@ -13,9 +13,13 @@ struct HabitRowView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(habit.name)
-                Text("Серия: \(habit.currentStreak) дн.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    Text("Серия: \(habit.currentStreak) дн.")
+                    Text("·")
+                    Text("Сила: \(Int(habit.score * 100))%")
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
 
             Spacer()

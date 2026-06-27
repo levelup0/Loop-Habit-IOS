@@ -60,6 +60,28 @@ final class Habit {
         return streak
     }
 
+    /// Exponential smoothing score in [0, 1] using the Loop formula: alpha = 1/13 per scheduled day
+    var score: Double {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        guard let startDate = cal.date(byAdding: .year, value: -1, to: today) else { return 0 }
+        let alpha = 1.0 / 13.0
+
+        var s = 0.0
+        var day = startDate
+        while day <= today {
+            let wd = cal.component(.weekday, from: day)
+            let dayNum = wd == 1 ? 7 : wd - 1
+            if daysOfWeek.contains(dayNum) {
+                let done = completed(on: day) ? 1.0 : 0.0
+                s = s * (1.0 - alpha) + done * alpha
+            }
+            guard let next = cal.date(byAdding: .day, value: 1, to: day) else { break }
+            day = next
+        }
+        return s
+    }
+
     var bestStreak: Int {
         let cal = Calendar.current
         let today = cal.startOfDay(for: .now)

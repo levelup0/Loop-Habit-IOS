@@ -37,18 +37,46 @@ struct HabitDetailView: View {
     // MARK: Stats
 
     private var statsCard: some View {
-        HStack {
-            stat("\(habit.currentStreak)", "Серия")
-            Divider().frame(height: 40)
-            stat("\(habit.bestStreak)", "Рекорд")
-            Divider().frame(height: 40)
-            stat(completionRate, "За 90 дней")
-            Divider().frame(height: 40)
-            stat("\(habit.entries.count)", "Всего")
+        VStack(spacing: 12) {
+            HStack {
+                stat("\(habit.currentStreak)", "Серия")
+                Divider().frame(height: 40)
+                stat("\(habit.bestStreak)", "Рекорд")
+                Divider().frame(height: 40)
+                stat(completionRate, "За 90 дней")
+                Divider().frame(height: 40)
+                stat("\(habit.entries.count)", "Всего")
+            }
+            Divider()
+            scoreRow
         }
         .padding()
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var scoreRow: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("Сила привычки")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text("\(Int(habit.score * 100))%")
+                    .font(.caption.bold())
+            }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color(.systemGray4))
+                        .frame(height: 8)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color(hex: habit.colorHex) ?? .accentColor)
+                        .frame(width: geo.size.width * habit.score, height: 8)
+                }
+            }
+            .frame(height: 8)
+        }
     }
 
     private func stat(_ value: String, _ label: String) -> some View {
