@@ -55,6 +55,32 @@ final class Habit {
         }
         return streak
     }
+
+    var bestStreak: Int {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        guard let limit = cal.date(byAdding: .year, value: -2, to: today) else { return 0 }
+
+        var best = 0
+        var current = 0
+        var day = limit
+
+        while day <= today {
+            let wd = cal.component(.weekday, from: day)
+            let dayNum = wd == 1 ? 7 : wd - 1
+            if daysOfWeek.contains(dayNum) {
+                if completed(on: day) {
+                    current += 1
+                    best = max(best, current)
+                } else {
+                    current = 0
+                }
+            }
+            guard let next = cal.date(byAdding: .day, value: 1, to: day) else { break }
+            day = next
+        }
+        return best
+    }
 }
 
 @Model
