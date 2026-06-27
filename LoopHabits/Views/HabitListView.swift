@@ -226,7 +226,6 @@ struct HabitDayCell: View {
     private var entry: HabitEntry? { entries.first }
 
     @State private var showingNumberSheet = false
-    @State private var numberResult: Double? = nil
 
     init(habit: Habit, date: Date) {
         self.habit = habit
@@ -260,13 +259,8 @@ struct HabitDayCell: View {
                         unit: habit.unit,
                         targetValue: habit.targetValue,
                         currentValue: entry?.numericValue,
-                        result: $numberResult
+                        onSave: { v in commitNumeric(newValue: v) }
                     )
-                    .onChange(of: numberResult) { _, v in
-                        guard let v else { return }
-                        commitNumeric(newValue: v)
-                        numberResult = nil
-                    }
                 }
             } else {
                 let effectiveVal = effectiveValue()

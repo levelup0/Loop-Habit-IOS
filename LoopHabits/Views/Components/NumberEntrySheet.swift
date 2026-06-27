@@ -5,14 +5,15 @@ struct NumberEntrySheet: View {
     let unit: String
     let targetValue: Double
     let currentValue: Double?
+    let onSave: (Double) -> Void   // called with the entered value before dismiss
 
-    @Binding var result: Double?
     @Environment(\.dismiss) private var dismiss
     @State private var text: String = ""
+    @FocusState private var focused: Bool
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
+            VStack(spacing: 32) {
                 VStack(spacing: 6) {
                     Text(habitName)
                         .font(.headline)
@@ -31,17 +32,22 @@ struct NumberEntrySheet: View {
 
                 TextField("0", text: $text)
                     .keyboardType(.decimalPad)
-                    .font(.system(size: 48, weight: .light, design: .rounded))
+                    .font(.system(size: 56, weight: .light, design: .rounded))
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                    .focused($focused)
                     .onAppear {
                         if let v = currentValue, v > 0 {
                             text = formatValue(v)
+                        }
+                        // Delay so sheet animation finishes first
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            focused = true
                         }
                     }
 
                 Spacer()
             }
+            .padding(.horizontal, 32)
             .navigationTitle("Enter Value")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -49,15 +55,25 @@ struct NumberEntrySheet: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("OK") {
-                        result = Double(text.replacingOccurrences(of: ",", with: "."))
-                        dismiss()
-                    }
-                    .fontWeight(.semibold)
+                    Button("OK") { commit() }
+                        .fontWeight(.semibold)
+                        .disabled(parsedValue == nil)
                 }
             }
         }
         .presentationDetents([.medium])
+        // Also allow confirm by pressing Return (numeric pad has no Return, but just in case)
+        .onSubmit { commit() }
+    }
+
+    private var parsedValue: Double? {
+        Double(text.replacingOccurrences(of: ",", with: "."))
+    }
+
+    private func commit() {
+        guard let v = parsedValue else { return }
+        onSave(v)
+        dismiss()
     }
 
     private var formattedTarget: String {
