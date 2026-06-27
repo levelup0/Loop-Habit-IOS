@@ -5,6 +5,7 @@ struct HabitDetailView: View {
     @Environment(\.modelContext) private var context
     let habit: Habit
     private let cal = Calendar.current
+    @State private var showingEdit = false
 
     var body: some View {
         ScrollView {
@@ -16,6 +17,14 @@ struct HabitDetailView: View {
         }
         .navigationTitle(habit.name)
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Изменить") { showingEdit = true }
+            }
+        }
+        .sheet(isPresented: $showingEdit) {
+            EditHabitView(habit: habit)
+        }
     }
 
     // MARK: Stats
