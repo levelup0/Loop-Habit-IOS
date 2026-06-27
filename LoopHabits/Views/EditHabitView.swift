@@ -16,8 +16,12 @@ struct EditHabitView: View {
     @State private var targetValue: Double
     @State private var targetType: TargetType
 
+    @State private var reminderHour: Int
+    @State private var reminderMinute: Int
     @State private var showingColorPicker = false
     @State private var showingFrequencyPicker = false
+    @State private var showingReminderPicker = false
+    @State private var reminderDate: Date
 
     init(habit: Habit) {
         self.habit = habit
@@ -32,6 +36,14 @@ struct EditHabitView: View {
         _unit         = State(initialValue: habit.unit)
         _targetValue  = State(initialValue: habit.targetValue)
         _targetType   = State(initialValue: habit.targetType)
+        _reminderHour   = State(initialValue: habit.reminderHour)
+        _reminderMinute = State(initialValue: habit.reminderMinute)
+        _showingReminderPicker = State(initialValue: habit.reminderHour >= 0)
+        let h = habit.reminderHour >= 0 ? habit.reminderHour : 8
+        let m = habit.reminderMinute
+        var c = Calendar.current.dateComponents([.year, .month, .day], from: .now)
+        c.hour = h; c.minute = m
+        _reminderDate = State(initialValue: Calendar.current.date(from: c) ?? .now)
     }
 
     var body: some View {
@@ -105,6 +117,40 @@ struct EditHabitView: View {
                     }
                 }
 
+                // Reminder
+                Section {
+                    Toggle(isOn: $showingReminderPicker) {
+                        HStack {
+                            Label("Reminder", systemImage: "bell")
+                            Spacer()
+                            if reminderHour >= 0 {
+                                Text(String(format: "%02d:%02d", reminderHour, reminderMinute))
+                                    .foregroundStyle(.secondary)
+                                    .font(.subheadline)
+                            }
+                        }
+                    }
+                    .onChange(of: showingReminderPicker) { _, on in
+                        if on {
+                            let c = Calendar.current.dateComponents([.hour, .minute], from: reminderDate)
+                            reminderHour = c.hour ?? 8
+                            reminderMinute = c.minute ?? 0
+                        } else {
+                            reminderHour = -1
+                        }
+                    }
+                    if showingReminderPicker {
+                        DatePicker("Time", selection: $reminderDate, displayedComponents: .hourAndMinute)
+                            .datePickerStyle(.wheel)
+                            .labelsHidden()
+                            .onChange(of: reminderDate) { _, d in
+                                let c = Calendar.current.dateComponents([.hour, .minute], from: d)
+                                reminderHour = c.hour ?? reminderHour
+                                reminderMinute = c.minute ?? reminderMinute
+                            }
+                    }
+                }
+
                 Section {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Notes").font(.caption).foregroundStyle(.secondary)
@@ -162,6 +208,9 @@ struct EditHabitView: View {
         habit.unit              = unit
         habit.targetValue       = targetValue
         habit.targetType        = targetType
+        habit.reminderHour      = reminderHour
+        habit.reminderMinute    = reminderMinute
+        ReminderManager.schedule(for: habit)
         dismiss()
     }
 }

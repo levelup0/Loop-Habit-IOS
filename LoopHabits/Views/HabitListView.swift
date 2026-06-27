@@ -118,6 +118,7 @@ struct HabitListView: View {
                 .frame(width: 180)
 
                 // Right: single shared horizontal scroll for all date columns
+                // scrollTargetBehavior(.viewAligned) gives discrete per-column snapping
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyVStack(spacing: 0) {
                         DateHeaderRow(dates: visibleDates)
@@ -126,7 +127,9 @@ struct HabitListView: View {
                             Divider().opacity(0.3)
                         }
                     }
+                    .scrollTargetLayout()
                 }
+                .scrollTargetBehavior(.viewAligned)
                 .defaultScrollAnchor(.trailing)
             }
         }
@@ -224,31 +227,87 @@ struct HabitDatesRow: View {
     let habit: Habit
     let dates: [Date]
 
+    @State private var showingNumberSheet = false
+    @State private var numberSheetDate: Date = .now
+    @State private var numberSheetEntry: HabitEntry? = nil
+    @State private var numberResult: Double? = nil
+
     private var habitColor: Color { Color(hex: habit.colorHex) ?? .accentColor }
+    private let cal = Calendar.current
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(dates, id: \.self) { date in
-                CheckmarkButton(
-                    isScheduled: habit.isScheduled(on: date),
-                    isDone: habit.completed(on: date),
-                    color: habitColor,
-                    isToday: Calendar.current.isDateInToday(date),
-                    onTap: { toggle(date) }
-                )
+                let entry = habit.entries.first(where: { cal.isDate($0.date, inSameDayAs: date) })
+                if habit.habitType == .measurable {
+                    let numVal: Double? = entry.flatMap { $0.numericValue > 0 ? $0.numericValue : nil }
+                    NumberButton(
+                        value: numVal,
+                        unit: habit.unit,
+                        color: habitColor,
+                        isToday: cal.isDateInToday(date),
+                        onTap: {
+                            numberSheetDate = date
+                            numberSheetEntry = entry
+                            showingNumberSheet = true
+                        }
+                    )
+                } else {
+                    let currentValue = entry?.value ?? CheckmarkValue.no.rawValue
+                    CheckmarkButton(
+                        value: currentValue,
+                        isScheduled: habit.isScheduled(on: date),
+                        color: habitColor,
+                        isToday: cal.isDateInToday(date),
+                        onTap: { cycle(date: date, entry: entry, current: currentValue) }
+                    )
+                }
             }
         }
         .frame(height: 56)
+        .sheet(isPresented: $showingNumberSheet) {
+            NumberEntrySheet(
+                habitName: habit.name,
+                unit: habit.unit,
+                targetValue: habit.targetValue,
+                currentValue: numberSheetEntry?.numericValue,
+                result: $numberResult
+            )
+            .onChange(of: numberResult) { _, v in
+                guard let v else { return }
+                commitNumeric(date: numberSheetDate, entry: numberSheetEntry, newValue: v)
+                numberResult = nil
+                numberSheetEntry = nil
+            }
+        }
     }
 
-    private func toggle(_ date: Date) {
-        let cal = Calendar.current
-        if let entry = habit.entries.first(where: { cal.isDate($0.date, inSameDayAs: date) }) {
-            context.delete(entry)
+    // Mirrors Android Entry.nextToggleValue(): NO→YES_MANUAL→SKIP→NO
+    private func cycle(date: Date, entry: HabitEntry?, current: Int) {
+        let next = nextCheckmarkValue(current)
+        if next == CheckmarkValue.no.rawValue {
+            if let e = entry { context.delete(e) }
+        } else if let e = entry {
+            e.value = next
         } else {
-            let entry = HabitEntry(date: date, value: .yesManual)
-            context.insert(entry)
-            habit.entries.append(entry)
+            let e = HabitEntry(date: date, value: CheckmarkValue(rawValue: next) ?? .yesManual)
+            context.insert(e)
+            habit.entries.append(e)
+        }
+    }
+
+    private func commitNumeric(date: Date, entry: HabitEntry?, newValue: Double) {
+        if newValue <= 0 {
+            if let e = entry { context.delete(e) }
+            return
+        }
+        if let e = entry {
+            e.numericValue = newValue
+            e.value = CheckmarkValue.yesManual.rawValue
+        } else {
+            let e = HabitEntry(date: date, numericValue: newValue)
+            context.insert(e)
+            habit.entries.append(e)
         }
     }
 }

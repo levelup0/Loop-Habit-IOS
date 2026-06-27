@@ -7,40 +7,46 @@ struct FrequencyPickerView: View {
     @Binding var daysOfWeek: Set<Int>
     @Environment(\.dismiss) private var dismiss
 
+    // Separate local state per frequency type — no cross-contamination
+    @State private var everyNDays: Int = 2
+    @State private var timesPerWeek: Int = 3
+    @State private var timesPerMonth: Int = 10
+    @State private var timesInN: Int = 3
+    @State private var timesInM: Int = 14
+
     private let dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    row(.everyDay,      "Every day")
-                    row(.everyNDays,    "Every \(denominator) days")
-                    row(.timesPerWeek,  "\(numerator) times per week")
-                    row(.timesPerMonth, "\(numerator) times per month")
-                    row(.timesInPeriod, "\(numerator) times in \(denominator) days")
-                    row(.specificDays,  "Specific days of week")
+                Section("Repeat") {
+                    radioRow(.everyDay,      "Every day")
+                    radioRow(.everyNDays,    "Every \(everyNDays) days")
+                    radioRow(.timesPerWeek,  "\(timesPerWeek) times per week")
+                    radioRow(.timesPerMonth, "\(timesPerMonth) times per month")
+                    radioRow(.timesInPeriod, "\(timesInN) times in \(timesInM) days")
+                    radioRow(.specificDays,  "Specific days of week")
                 }
 
-                // Contextual steppers
                 if frequencyType == .everyNDays {
-                    Section("Every N days") {
-                        Stepper("Every \(denominator) days", value: $denominator, in: 2...365)
+                    Section {
+                        Stepper("Every \(everyNDays) days", value: $everyNDays, in: 2...365)
                     }
                 }
                 if frequencyType == .timesPerWeek {
-                    Section("Times per week") {
-                        Stepper("\(numerator) times per week", value: $numerator, in: 1...7)
+                    Section {
+                        Stepper("\(timesPerWeek) times per week", value: $timesPerWeek, in: 1...7)
                     }
                 }
                 if frequencyType == .timesPerMonth {
-                    Section("Times per month") {
-                        Stepper("\(numerator) times per month", value: $numerator, in: 1...31)
+                    Section {
+                        Stepper("\(timesPerMonth) times per month", value: $timesPerMonth, in: 1...31)
                     }
                 }
                 if frequencyType == .timesInPeriod {
-                    Section("Custom") {
-                        Stepper("\(numerator) times", value: $numerator, in: 1...365)
-                        Stepper("in \(denominator) days", value: $denominator, in: 1...365)
+                    Section {
+                        Stepper("\(timesInN) times", value: $timesInN, in: 1...365)
+                        Stepper("in \(timesInM) days", value: $timesInM, in: 2...365)
                     }
                 }
                 if frequencyType == .specificDays {
@@ -69,25 +75,60 @@ struct FrequencyPickerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Save") { commitAndDismiss() }
                         .fontWeight(.semibold)
+                }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.large])
+        .onAppear { loadCurrentValues() }
     }
 
-    private func row(_ type: FrequencyType, _ label: String) -> some View {
+    // Populate local steppers from current bindings
+    private func loadCurrentValues() {
+        switch frequencyType {
+        case .everyNDays:    everyNDays = max(2, denominator)
+        case .timesPerWeek:  timesPerWeek = max(1, numerator)
+        case .timesPerMonth: timesPerMonth = max(1, numerator)
+        case .timesInPeriod: timesInN = max(1, numerator); timesInM = max(2, denominator)
+        default: break
+        }
+    }
+
+    // Write back to bindings on Save
+    private func commitAndDismiss() {
+        switch frequencyType {
+        case .everyDay:
+            numerator = 1; denominator = 1
+        case .everyNDays:
+            numerator = 1; denominator = everyNDays
+        case .timesPerWeek:
+            numerator = timesPerWeek; denominator = 7
+        case .timesPerMonth:
+            numerator = timesPerMonth; denominator = 30
+        case .timesInPeriod:
+            numerator = timesInN; denominator = timesInM
+        case .specificDays:
+            numerator = daysOfWeek.count; denominator = 7
+        }
+        dismiss()
+    }
+
+    private func radioRow(_ type: FrequencyType, _ label: String) -> some View {
         Button {
             frequencyType = type
         } label: {
             HStack {
                 Image(systemName: frequencyType == type ? "record.circle.fill" : "circle")
-                    .foregroundStyle(frequencyType == type ? Color.accentColor : Color.secondary)
+                    .foregroundStyle(frequencyType == type ? Color.accentColor : .secondary)
                 Text(label)
                     .foregroundStyle(.primary)
                 Spacer()
             }
         }
+        .buttonStyle(.plain)
     }
 }

@@ -266,31 +266,47 @@ struct HabitDetailView: View {
 
     @ViewBuilder
     private func calendarDot(_ day: Date) -> some View {
-        let wd = cal.component(.weekday, from: day)
-        let dayNum = wd == 1 ? 7 : wd - 1
         let scheduled = habit.daysOfWeek.isEmpty || habit.isScheduled(on: day)
-        let done = habit.completed(on: day)
+        let entry = habit.entries.first(where: { cal.isDate($0.date, inSameDayAs: day) })
+        let entryVal = entry?.checkmarkValue ?? .no
+        let done = entryVal == .yesManual || entryVal == .yesAuto
+        let isSkip = entryVal == .skip
         let isToday = cal.isDateInToday(day)
 
-        Circle()
-            .fill(done ? habitColor : Color.clear)
-            .overlay {
-                if !done && scheduled {
-                    Circle().strokeBorder(habitColor.opacity(0.3), lineWidth: 1)
+        ZStack {
+            Circle()
+                .fill(done ? habitColor : Color.clear)
+                .overlay {
+                    if !done && !isSkip && scheduled {
+                        Circle().strokeBorder(habitColor.opacity(0.3), lineWidth: 1)
+                    }
+                    if isSkip {
+                        Circle().strokeBorder(habitColor.opacity(0.4), lineWidth: 1)
+                    }
+                    if isToday {
+                        Circle().strokeBorder(.primary.opacity(0.5), lineWidth: 1.5)
+                    }
                 }
-                if isToday {
-                    Circle().strokeBorder(.primary.opacity(0.5), lineWidth: 1.5)
-                }
+            if isSkip {
+                Rectangle()
+                    .fill(habitColor.opacity(0.5))
+                    .frame(width: 8, height: 1.5)
             }
-            .frame(maxWidth: .infinity, minHeight: 22, maxHeight: 22)
-            .onTapGesture { if scheduled { toggleDay(day) } }
+        }
+        .frame(maxWidth: .infinity, minHeight: 22, maxHeight: 22)
+        .onTapGesture { if scheduled { toggleDay(day) } }
     }
 
     private func toggleDay(_ day: Date) {
-        if let e = habit.entries.first(where: { cal.isDate($0.date, inSameDayAs: day) }) {
-            context.delete(e)
+        let existing = habit.entries.first(where: { cal.isDate($0.date, inSameDayAs: day) })
+        let current = existing?.value ?? CheckmarkValue.no.rawValue
+        let next = nextCheckmarkValue(current)
+        if next == CheckmarkValue.no.rawValue {
+            if let e = existing { context.delete(e) }
+        } else if let e = existing {
+            e.value = next
         } else {
-            let e = HabitEntry(date: day, value: .yesManual)
+            let e = HabitEntry(date: day, value: CheckmarkValue(rawValue: next) ?? .yesManual)
             context.insert(e)
             habit.entries.append(e)
         }

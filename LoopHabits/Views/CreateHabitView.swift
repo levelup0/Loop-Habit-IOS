@@ -25,6 +25,12 @@ struct CreateHabitView: View {
 
     @State private var showingColorPicker = false
     @State private var showingFrequencyPicker = false
+    @State private var showingReminderPicker = false
+    @State private var reminderDate: Date = {
+        var c = Calendar.current.dateComponents([.year, .month, .day], from: .now)
+        c.hour = 8; c.minute = 0
+        return Calendar.current.date(from: c) ?? .now
+    }()
 
     private let palette = Color.loopPalette
 
@@ -114,10 +120,35 @@ struct CreateHabitView: View {
 
                 // Reminder
                 Section {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Reminder").font(.caption).foregroundStyle(.secondary)
-                        Text(reminderHour == -1 ? "Off" : String(format: "%02d:%02d", reminderHour, reminderMinute))
-                            .foregroundStyle(.secondary)
+                    Toggle(isOn: $showingReminderPicker) {
+                        HStack {
+                            Label("Reminder", systemImage: "bell")
+                            Spacer()
+                            if reminderHour >= 0 {
+                                Text(String(format: "%02d:%02d", reminderHour, reminderMinute))
+                                    .foregroundStyle(.secondary)
+                                    .font(.subheadline)
+                            }
+                        }
+                    }
+                    .onChange(of: showingReminderPicker) { _, on in
+                        if on {
+                            let c = Calendar.current.dateComponents([.hour, .minute], from: reminderDate)
+                            reminderHour = c.hour ?? 8
+                            reminderMinute = c.minute ?? 0
+                        } else {
+                            reminderHour = -1
+                        }
+                    }
+                    if showingReminderPicker {
+                        DatePicker("Time", selection: $reminderDate, displayedComponents: .hourAndMinute)
+                            .datePickerStyle(.wheel)
+                            .labelsHidden()
+                            .onChange(of: reminderDate) { _, d in
+                                let c = Calendar.current.dateComponents([.hour, .minute], from: d)
+                                reminderHour = c.hour ?? reminderHour
+                                reminderMinute = c.minute ?? reminderMinute
+                            }
                     }
                 }
 
@@ -186,6 +217,7 @@ struct CreateHabitView: View {
         h.reminderHour = reminderHour
         h.reminderMinute = reminderMinute
         context.insert(h)
+        ReminderManager.schedule(for: h)
         dismiss()
     }
 }

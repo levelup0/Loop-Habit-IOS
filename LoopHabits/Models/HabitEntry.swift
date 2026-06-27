@@ -13,14 +13,24 @@ enum CheckmarkValue: Int {
 final class HabitEntry {
     var id: UUID
     var date: Date
-    var value: Int      // CheckmarkValue raw value; 2 = yesManual
+    var value: Int          // CheckmarkValue raw value; 2 = yesManual
+    var numericValue: Double // for Measurable habits; 0 = not set
     var entryNotes: String
 
     init(date: Date = .now, value: CheckmarkValue = .yesManual, notes: String = "") {
-        self.id         = UUID()
-        self.date       = date
-        self.value      = value.rawValue
-        self.entryNotes = notes
+        self.id           = UUID()
+        self.date         = date
+        self.value        = value.rawValue
+        self.numericValue = 0
+        self.entryNotes   = notes
+    }
+
+    init(date: Date, numericValue: Double, notes: String = "") {
+        self.id           = UUID()
+        self.date         = date
+        self.value        = numericValue > 0 ? CheckmarkValue.yesManual.rawValue : CheckmarkValue.no.rawValue
+        self.numericValue = numericValue
+        self.entryNotes   = notes
     }
 
     var checkmarkValue: CheckmarkValue {

@@ -26,6 +26,9 @@
 		AA000046B /* CreateHabitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000046A; };
 		AA000047B /* FrequencyPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000047A; };
 		AA000048B /* ColorPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000048A; };
+		AA000050B /* NumberButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000050A; };
+		AA000051B /* NumberEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000051A; };
+		AA000052B /* ReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000052A; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +53,9 @@
 		AA000046A /* CreateHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateHabitView.swift; sourceTree = "<group>"; };
 		AA000047A /* FrequencyPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrequencyPickerView.swift; sourceTree = "<group>"; };
 		AA000048A /* ColorPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerSheet.swift; sourceTree = "<group>"; };
+		AA000050A /* NumberButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberButton.swift; sourceTree = "<group>"; };
+		AA000051A /* NumberEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberEntrySheet.swift; sourceTree = "<group>"; };
+		AA000052A /* ReminderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +83,7 @@
 				AA000029 /* Models */,
 				AA000030 /* Views */,
 				AA000036 /* Extensions */,
+				AA000053A /* Utils */,
 				AA000025 /* Assets.xcassets */,
 			);
 			path = LoopHabits;
@@ -130,8 +137,18 @@
 				AA000044A /* CheckmarkButton.swift */,
 				AA000047A /* FrequencyPickerView.swift */,
 				AA000048A /* ColorPickerSheet.swift */,
+				AA000050A /* NumberButton.swift */,
+				AA000051A /* NumberEntrySheet.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		AA000053A /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				AA000052A /* ReminderManager.swift */,
+			);
+			path = Utils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -210,6 +227,9 @@
 				AA000046B /* CreateHabitView.swift in Sources */,
 				AA000047B /* FrequencyPickerView.swift in Sources */,
 				AA000048B /* ColorPickerSheet.swift in Sources */,
+				AA000050B /* NumberButton.swift in Sources */,
+				AA000051B /* NumberEntrySheet.swift in Sources */,
+				AA000052B /* ReminderManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
